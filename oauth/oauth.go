@@ -56,6 +56,8 @@ func GenerateClientCredentialAssertion(
 
 func VerifyOAuth(
 	authorization, serviceName, certPath string,
+	expectedConsumerPlmnId *models.PlmnId,
+	expectedProducerPlmnId *models.PlmnId,
 ) error {
 	verifyKey, err := ParsePublicKeyFromPEM(certPath)
 	if err != nil {
@@ -84,8 +86,32 @@ func VerifyOAuth(
 		return errors.Wrapf(err, "verify OAuth parse")
 	}
 
-	if !verifyScope(token.Claims.(*models.NrfAccessTokenAccessTokenClaims).Scope, serviceName) {
+	claims := token.Claims.(*models.NrfAccessTokenAccessTokenClaims)
+
+	if !verifyScope(claims.Scope, serviceName) {
 		return errors.Wrapf(err, "verify OAuth scope")
+	}
+
+	// Verify Consumer PLMN ID if provided
+	if expectedConsumerPlmnId != nil {
+		if claims.ConsumerPlmnId == nil {
+			return errors.New("missing consumer PLMN ID in token")
+		}
+		if claims.ConsumerPlmnId.Mcc != expectedConsumerPlmnId.Mcc ||
+			claims.ConsumerPlmnId.Mnc != expectedConsumerPlmnId.Mnc {
+			return errors.New("consumer PLMN ID mismatch")
+		}
+	}
+
+	// Verify Producer PLMN ID if provided
+	if expectedProducerPlmnId != nil {
+		if claims.ProducerPlmnId == nil {
+			return errors.New("missing producer PLMN ID in token")
+		}
+		if claims.ProducerPlmnId.Mcc != expectedProducerPlmnId.Mcc ||
+			claims.ProducerPlmnId.Mnc != expectedProducerPlmnId.Mnc {
+			return errors.New("producer PLMN ID mismatch")
+		}
 	}
 	return nil
 }
