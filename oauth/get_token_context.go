@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/openapi/nrf/AccessToken"
+	"github.com/sadhasiva1984/openapi"
+	"github.com/sadhasiva1984/openapi/models"
+	"github.com/sadhasiva1984/openapi/nrf/AccessToken"
 )
 
 var tokenMap sync.Map

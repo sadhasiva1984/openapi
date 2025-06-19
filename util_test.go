@@ -3,7 +3,7 @@ package openapi
 import (
 	"testing"
 
-	"github.com/free5gc/openapi/models"
+	"github.com/sadhasiva1984/openapi/models"
 	"github.com/stretchr/testify/require"
 )
 

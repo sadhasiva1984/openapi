@@ -1,8 +1,8 @@
 package SubscriberDataManagement
 
 import (
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
+	"github.com/sadhasiva1984/openapi"
+	"github.com/sadhasiva1984/openapi/models"
 
 	"context"
 	"io/ioutil"
