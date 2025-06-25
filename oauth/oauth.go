@@ -92,29 +92,30 @@ func VerifyOAuth(
 		return errors.Wrapf(err, "verify OAuth scope")
 	}
 
-	// Verify Consumer PLMN ID if provided
-	if expectedConsumerPlmnId != nil {
-		if claims.ConsumerPlmnId == nil {
-			return errors.New("missing consumer PLMN ID in token")
+	// Verify PLMN IDs
+	if expectedConsumerPlmnId != nil && expectedProducerPlmnId != nil {
+		// 1. Check if both PLMN IDs are present
+		if claims.ConsumerPlmnId == nil || claims.ProducerPlmnId == nil {
+			return errors.New("both consumer and producer PLMN IDs must be present in token")
 		}
-		if (claims.ConsumerPlmnId.Mcc != expectedConsumerPlmnId.Mcc ||
-			claims.ConsumerPlmnId.Mnc != expectedConsumerPlmnId.Mnc) ||
-			(claims.ConsumerPlmnId.Mcc != expectedProducerPlmnId.Mcc ||
-				claims.ConsumerPlmnId.Mnc != expectedProducerPlmnId.Mnc) {
-			return errors.New("consumer PLMN ID mismatch")
-		}
-	}
 
-	// Verify Producer PLMN ID if provided
-	if expectedProducerPlmnId != nil {
-		if claims.ProducerPlmnId == nil {
-			return errors.New("missing producer PLMN ID in token")
-		}
+		// 2. Verify Producer PLMN ID - must match exactly with expected producer
 		if claims.ProducerPlmnId.Mcc != expectedProducerPlmnId.Mcc ||
 			claims.ProducerPlmnId.Mnc != expectedProducerPlmnId.Mnc {
 			return errors.New("producer PLMN ID mismatch")
 		}
+
+		// 3. Verify Consumer PLMN ID - can match either consumer or producer
+		isValidConsumer := (claims.ConsumerPlmnId.Mcc == expectedConsumerPlmnId.Mcc &&
+			claims.ConsumerPlmnId.Mnc == expectedConsumerPlmnId.Mnc) ||
+			(claims.ConsumerPlmnId.Mcc == expectedProducerPlmnId.Mcc &&
+				claims.ConsumerPlmnId.Mnc == expectedProducerPlmnId.Mnc)
+
+		if !isValidConsumer {
+			return errors.New("consumer PLMN ID does not match either expected consumer or producer PLMN ID")
+		}
 	}
+
 	return nil
 }
 
