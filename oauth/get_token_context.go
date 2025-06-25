@@ -18,8 +18,9 @@ var clientMap sync.Map
 func GetTokenCtx(
 	nfType, targetNF models.NrfNfManagementNfType,
 	nfId, nrfUri, scope string,
+	requesterPlmnId, targetPlmnId *models.PlmnId,
 ) (context.Context, *models.ProblemDetails, error) {
-	tok, pd, err := sendAccTokenReq(nfType, targetNF, nfId, nrfUri, scope)
+	tok, pd, err := sendAccTokenReq(nfType, targetNF, nfId, nrfUri, scope, requesterPlmnId, targetPlmnId)
 	if err != nil {
 		return nil, pd, err
 	}
@@ -30,6 +31,7 @@ func GetTokenCtx(
 func sendAccTokenReq(
 	nfType, targetNF models.NrfNfManagementNfType,
 	nfId, nrfUri, scope string,
+	requesterPlmnId, targetPlmnId *models.PlmnId,
 ) (oauth2.TokenSource, *models.ProblemDetails, error) {
 	var client *AccessToken.APIClient
 
@@ -62,6 +64,14 @@ func sendAccTokenReq(
 	req.SetNfType(nfType)
 	req.SetTargetNfType(targetNF)
 	req.SetScope(scope)
+
+	// Set PLMN IDs if provided
+	if requesterPlmnId != nil {
+		req.SetRequesterPlmn(*requesterPlmnId)
+	}
+	if targetPlmnId != nil {
+		req.SetTargetPlmn(*targetPlmnId)
+	}
 
 	res, err := client.AccessTokenRequestApi.AccessTokenRequest(
 		context.Background(), req)
