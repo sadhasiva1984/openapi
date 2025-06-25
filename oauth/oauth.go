@@ -97,8 +97,10 @@ func VerifyOAuth(
 		if claims.ConsumerPlmnId == nil {
 			return errors.New("missing consumer PLMN ID in token")
 		}
-		if claims.ConsumerPlmnId.Mcc != expectedConsumerPlmnId.Mcc ||
-			claims.ConsumerPlmnId.Mnc != expectedConsumerPlmnId.Mnc {
+		if (claims.ConsumerPlmnId.Mcc != expectedConsumerPlmnId.Mcc ||
+			claims.ConsumerPlmnId.Mnc != expectedConsumerPlmnId.Mnc) ||
+			(claims.ConsumerPlmnId.Mcc != expectedProducerPlmnId.Mcc ||
+				claims.ConsumerPlmnId.Mnc != expectedProducerPlmnId.Mnc) {
 			return errors.New("consumer PLMN ID mismatch")
 		}
 	}
